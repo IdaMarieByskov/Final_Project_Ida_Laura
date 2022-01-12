@@ -1,0 +1,143 @@
+---
+title: "Aarhus"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+## Final project about Tourism in Aarhus and comparing with the region of Region Midtjylland 
+
+
+- Please start by cloning the necessary files in the repository at; <https://github.com/IdaMarieByskov/Final_Project_Ida_Laura>
+- Place them at your Desktop in order to use this code. 
+
+#### Using this line to get a closer behaviour from the command line as from the RStudio environment in terms of package downloads. This is in order to make the Knit work. 
+```{r}
+options(repos = list(CRAN="http://cran.rstudio.com/"))
+```
+
+#### Install Packages 
+```{r PackagesInstall, echo=FALSE}
+install.packages("gganimate")
+install.packages("gifski")
+install.packages("av")
+install.packages("gapminder")
+install.packages("dplyr")
+install.packages("rmarkdown")
+install.packages("data.table")
+```
+
+#### View Packages 
+```{r Packages, echo=FALSE}
+#View packages 
+library(tidyverse)
+library(gganimate)
+library(gifski)
+library(av)
+library(gapminder)
+library(dplyr)
+library(rmarkdown)
+library(data.table)
+```
+
+### Load Data Aarhus  
+```{r Aarhus, echo=TRUE}
+#load the excel sheet 
+library(readxl)
+Tourism_Aarhus <- read_excel("~/Desktop/Aarhus.xlsx")
+
+#view Data 
+View(Tourism_Aarhus)
+```
+
+### Renaming the column headers 
+
+```{r}
+# Rename to column headers
+Tourism_Aarhus <- Tourism_Aarhus %>% 
+  rename(
+    Accommodation = ...1,
+    Months = ...2  
+  )
+
+#view Data 
+View(Tourism_Aarhus)
+```
+
+### Adding values in all rows in the accommodation column and translateing names to English
+```{r}
+# add values in all rows in the accommodation column make it English names 
+Tourism_Aarhus$Accommodation [1:12] <- "Hotels"
+Tourism_Aarhus$Accommodation [13:24] <- "Vacationcenter"
+Tourism_Aarhus$Accommodation [25:36] <- "Camping"
+Tourism_Aarhus$Accommodation [37:48] <- "Hostel"
+Tourism_Aarhus$Accommodation [49:60] <- "Marinas"
+Tourism_Aarhus$Accommodation [61:72] <- "HolidayHouses"
+
+#view Data 
+View(Tourism_Aarhus)
+```
+
+### Replace the missing values across the DataFrame with NA
+```{r}
+# Replace the missing values across the DataFrame with NA 
+Tourism_Aarhus[Tourism_Aarhus == ".."] <- NA
+
+#view Data 
+View(Tourism_Aarhus)
+```
+
+
+### Convering the colunms 2017 to 2021 into year, by using the 'gather' function.
+```{r}
+#Convering the colunms 2017 to 2021 into year. 
+Tourism_Aarhus_gathered <- Tourism_Aarhus %>% 
+  gather(Year, Nights, "2017":"2021")
+
+#view Data 
+View(Tourism_Aarhus_gathered)
+```
+
+### Delete vacationcenters as they are calculated as a total with hotels in the raw dataset
+```{r}
+#Delete vacationcenters  
+Tourism_Aarhus_gathered <- Tourism_Aarhus_gathered[!(Tourism_Aarhus_gathered$Accommodation=="Vacationcenter"),]
+
+#view Data 
+View(Tourism_Aarhus_gathered)
+```
+
+### Renaming 'Hotels' to 'Hotels and Vacationscenters' as these are calculated together in the raw data
+```{r}
+# Rename Hotels to Hotels and Vacationscenters
+Tourism_Aarhus_gathered$Accommodation[Tourism_Aarhus_gathered$Accommodation == "Hotels"] <- "Hotels and Vacationcenters"
+
+#view Data 
+View(Tourism_Aarhus_gathered)
+```
+
+### Delete months which is not part of the summer period  
+- We would only like to look at may, june, july, august and september. 
+```{r}
+#Delete months which is not part of the summer period  
+Tourism_Aarhus_gathered <- Tourism_Aarhus_gathered[!(Tourism_Aarhus_gathered$Months=="Januar" | Tourism_Aarhus_gathered$Months=="Februar" | Tourism_Aarhus_gathered$Months=="Marts" | Tourism_Aarhus_gathered$Months=="April" | Tourism_Aarhus_gathered$Months=="Oktober" | Tourism_Aarhus_gathered$Months=="November" | Tourism_Aarhus_gathered$Months=="December"),]
+
+#view Data 
+View(Tourism_Aarhus_gathered)
+```
+
+### Saving the data in a CSV file 
+We have to save it as a CSV file, as the the online visualization program are not able to process XLSX spreadsheets. 
+```{r}
+#Save the dataframe on desktop as CSV file 
+write.csv(Tourism_Aarhus_gathered, "~/Desktop/Aarhus.csv", row.names = FALSE)
+```
+
+

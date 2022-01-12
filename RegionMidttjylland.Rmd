@@ -1,0 +1,141 @@
+---
+title: "Tourism"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+## Final project about Tourism in Aarhus and comparing with the region of Region Midtjylland 
+
+- Please start by cloning the necessary files in the repository at; <https://github.com/IdaMarieByskov/Final_Project_Ida_Laura>
+- Place them at your Desktop in order to use this code. 
+
+#### Using this line to get a closer behaviour from the command line as from the RStudio environment in terms of package downloads. This is in order to make the Knit work. 
+```{r}
+options(repos = list(CRAN="http://cran.rstudio.com/"))
+```
+
+#### Install Packages
+```{r InstallPackages, echo=FALSE}
+install.packages("gganimate")
+install.packages("gifski")
+install.packages("av")
+install.packages("gapminder")
+install.packages("dplyr")
+install.packages("rmarkdown")
+install.packages("data.table")
+```
+
+#### View Packages
+```{r Packages, echo=FALSE}
+#View packages 
+library(tidyverse)
+library(gganimate)
+library(gifski)
+library(av)
+library(gapminder)
+library(dplyr)
+library(rmarkdown)
+library(data.table)
+```
+
+
+### Load Data Region Midtjylland 
+```{r RegionMidtjylland, echo=FALSE}
+
+#load the excel sheet 
+library(readxl)
+Tourism_RegionMidtjylland <- read_xlsx("~/Desktop/RegionMidtjylland.xlsx")
+# check the data 
+View(Tourism_RegionMidtjylland)
+head(Tourism_RegionMidtjylland)
+colnames(Tourism_RegionMidtjylland)
+```
+
+### Renaming the column headers 
+```{r}
+# Rename column headers 
+Tourism_RegionMidtjylland <- Tourism_RegionMidtjylland %>% 
+  rename(
+    Accommodation = ...1,
+    Months = ...2  
+  )
+View(Tourism_RegionMidtjylland)
+```
+
+### Adding values in all rows in the accommodation column and translateing names to English
+```{r}
+# add values in all rows in the accommodation column and translate to English 
+Tourism_RegionMidtjylland$Accommodation [1:12] <- "Hotels"
+Tourism_RegionMidtjylland$Accommodation [13:24] <- "Vacationcenter"
+Tourism_RegionMidtjylland$Accommodation [25:36] <- "Camping"
+Tourism_RegionMidtjylland$Accommodation [37:48] <- "Hostel"
+Tourism_RegionMidtjylland$Accommodation [49:60] <- "Marinas"
+Tourism_RegionMidtjylland$Accommodation [61:72] <- "HolidayHouses"
+```
+
+### Replace the missing values across the DataFrame with NA
+```{r}
+# Replace the missing values across the DataFrame with NA 
+Tourism_RegionMidtjylland[Tourism_RegionMidtjylland == 0] <- NA
+```
+
+### Delete Holidayhouses because of missing data 
+```{r}
+#Delete Holidayhouses as there are no data in this  
+Tourism_RegionMidtjylland <- Tourism_RegionMidtjylland[!(Tourism_RegionMidtjylland$Accommodation=="HolidayHouses"),]
+```
+
+### Name 'hotels' and 'vacationcenters' the same; 'hotels and vacationcenters' in order to compare with the Aarhus dataset. 
+```{r}
+# Name hotels and vacationcenters the same
+Tourism_RegionMidtjylland$Accommodation [1:12] <- "Hotels and Vacationcenters"
+Tourism_RegionMidtjylland$Accommodation [13:24] <- "Hotels and Vacationcenters"
+```
+
+### Convering the colunms 2017 to 2021 into year, by using the 'gather' function.
+```{r}
+#Convering the colunms 2017 to 2021 into year. 
+Tourism_RegionMidtjylland_gathered <- Tourism_RegionMidtjylland %>% 
+  gather(Year, Nights, "2017":"2021")
+
+#View the data
+View(Tourism_RegionMidtjylland_gathered)
+    
+```
+
+### Trying to plus the values in the 'Hotels and Vacationcenters' rows that are similar. 
+```{r}
+# View(Tourism_RegionMidtjylland_gathered)
+```
+
+
+### Delete months which is not part of the summer period  
+- We would only like to look at may, june, july, august and september. 
+```{r}
+#Delete months which is not part of the summer period  
+Tourism_RegionMidtjylland_gathered <- Tourism_RegionMidtjylland_gathered [!(Tourism_RegionMidtjylland_gathered$Months=="Januar" | Tourism_RegionMidtjylland_gathered$Months=="Februar" | Tourism_RegionMidtjylland_gathered$Months=="Marts" | Tourism_RegionMidtjylland_gathered$Months=="April" | Tourism_RegionMidtjylland_gathered$Months=="Oktober" | Tourism_RegionMidtjylland_gathered$Months=="November" | Tourism_RegionMidtjylland_gathered$Months=="December"),]
+
+#view Data 
+View(Tourism_RegionMidtjylland_gathered)
+```
+
+### Saving the data in a CSV file 
+We have to save it as a CSV file, as the the online visualization program are not able to process XLSX spreadsheets. 
+```{r}
+#Save the dataframe on desktop as CSV file 
+write.csv(Tourism_RegionMidtjylland_gathered, "~/Desktop/RegionMidtjylland.csv", row.names = FALSE)
+```
+
+
+
+
+
+
